@@ -1,0 +1,62 @@
+{
+  "name": "hewan-njir",
+  "productName": "Hewan Njir",
+  "version": "1.0.0",
+  "description": "An interactive, floating desktop mascot for developers that reacts to coding activity (TypeScript)",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "tsc && node scripts/copy-assets.js",
+    "watch": "tsc -w",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node scripts/mac-fix.js",
+    "start": "npm run build && electron .",
+    "dev": "npm run build && electron . --dev",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder"
+  },
+  "keywords": [
+    "electron",
+    "typescript",
+    "mascot",
+    "tamagotchi",
+    "developer-tool",
+    "desktop-pet",
+    "productivity"
+  ],
+  "author": "Hewan Njir Dev Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "electron": "^34.5.8",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.8.2"
+  },
+  "build": {
+    "appId": "com.hewannjir.desktop",
+    "productName": "Hewan Njir",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "tar.gz"
+      ],
+      "category": "Utility"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ]
+  }
+}

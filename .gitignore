@@ -1,0 +1,22 @@
+# Dependency directories
+node_modules/
+
+# Production build output
+dist/
+build/
+out/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+*.log
+
+# User and Editor data
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local runtime data
+config.local.json
+.agents/

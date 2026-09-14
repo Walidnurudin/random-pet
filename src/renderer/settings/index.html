@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hewan Njir - Settings</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>var exports = {};</script>
+</head>
+<body>
+  <div class="settings-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="app-brand">
+          <div class="brand-avatar">🦊</div>
+          <div class="brand-info">
+            <h2>Hewan Njir</h2>
+            <span class="version-badge">v1.0.0</span>
+          </div>
+        </div>
+      </div>
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="tab-mascot">
+          <span class="icon">🐾</span>
+          <span>Mascot & Style</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-activity">
+          <span class="icon">⚡</span>
+          <span>Activity & Idle</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-reminders">
+          <span class="icon">💧</span>
+          <span>Health Reminders</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-hotkeys">
+          <span class="icon">⌨️</span>
+          <span>Hotkeys & Input</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-simulator">
+          <span class="icon">🧪</span>
+          <span>Test Simulator</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+      <!-- 1. Mascot Tab -->
+      <section id="tab-mascot" class="tab-pane active">
+        <div class="section-header">
+          <h3>Choose Your Companion</h3>
+          <p class="section-desc">Select the desktop mascot that will react to your coding sessions.</p>
+        </div>
+
+        <div class="mascot-grid">
+          <!-- Fox Card -->
+          <label class="mascot-card">
+            <input type="radio" name="mascot-choice" value="fox" checked>
+            <div class="card-inner">
+              <div class="mascot-emoji">🦊</div>
+              <h4>Kitsune Fox</h4>
+              <p>Playful, fluffy-tailed companion. Hacks away on mechanical keys.</p>
+              <span class="badge">Default</span>
+            </div>
+          </label>
+
+          <!-- Cat Card -->
+          <label class="mascot-card">
+            <input type="radio" name="mascot-choice" value="cat">
+            <div class="card-inner">
+              <div class="mascot-emoji">🐱</div>
+              <h4>Pixel Cat</h4>
+              <p>Calm lo-fi developer cat. Swipes paws and naps peacefully.</p>
+              <span class="badge">Lo-Fi</span>
+            </div>
+          </label>
+
+          <!-- Bot Card -->
+          <label class="mascot-card">
+            <input type="radio" name="mascot-choice" value="bot">
+            <div class="card-inner">
+              <div class="mascot-emoji">🤖</div>
+              <h4>Cyber-Bot</h4>
+              <p>Futuristic AI assistant with neon LED visor and matrix code streams.</p>
+              <span class="badge">Sci-Fi</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="card-setting">
+          <div class="setting-text">
+            <h4>Speech Bubbles & Thoughts</h4>
+            <p>Allow the mascot to show encouraging remarks, thoughts, and quips.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="setting-speech-bubbles" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 2. Activity Tab -->
+      <section id="tab-activity" class="tab-pane">
+        <div class="section-header">
+          <h3>Activity Monitoring</h3>
+          <p class="section-desc">Tune how sensitive the mascot is to your keyboard and mouse idle times.</p>
+        </div>
+
+        <div class="settings-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>Idle Time Sensitivity</h4>
+              <p>Transition to relaxing state after no system activity for this long.</p>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="setting-idle-threshold" min="10" max="180" step="5" value="30">
+              <span id="label-idle-threshold" class="slider-value">30s</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>Sleep Threshold</h4>
+              <p>Mascot curls up and snoozes (Zzz) when inactive for this long.</p>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="setting-sleep-threshold" min="60" max="600" step="30" value="120">
+              <span id="label-sleep-threshold" class="slider-value">120s</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Reminders Tab -->
+      <section id="tab-reminders" class="tab-pane">
+        <div class="section-header">
+          <h3>Health & Ergonomics Reminders</h3>
+          <p class="section-desc">Keep healthy while shipping features. The mascot will notify you gently.</p>
+        </div>
+
+        <div class="card-setting">
+          <div class="setting-text">
+            <h4>Enable Health Reminders</h4>
+            <p>Show break and wellness prompts in mascot thought bubbles.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="setting-reminders-enabled" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>💧 Hydration Interval</h4>
+              <p>Remind to take a sip of fresh water.</p>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="setting-hydration-interval" min="15" max="120" step="15" value="45">
+              <span id="label-hydration-interval" class="slider-value">45 min</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>🧘 Stretch & Posture Interval</h4>
+              <p>Remind to straighten posture and stretch arms.</p>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="setting-stretch-interval" min="30" max="180" step="15" value="75">
+              <span id="label-stretch-interval" class="slider-value">75 min</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>👀 20-20-20 Eye Rest Interval</h4>
+              <p>Look 20 feet away for 20 seconds to prevent screen eye strain.</p>
+            </div>
+            <div class="slider-control">
+              <input type="range" id="setting-eye-interval" min="15" max="60" step="5" value="20">
+              <span id="label-eye-interval" class="slider-value">20 min</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Hotkeys Tab -->
+      <section id="tab-hotkeys" class="tab-pane">
+        <div class="section-header">
+          <h3>Global Hotkeys & Click-Through</h3>
+          <p class="section-desc">Shortcuts to interact with Hewan Njir without disrupting your code editor.</p>
+        </div>
+
+        <div class="hotkey-list">
+          <div class="hotkey-item">
+            <div class="hotkey-info">
+              <h4>Toggle Mouse Click-Through</h4>
+              <p>Allows clicking and dragging the mascot or making it completely click-through.</p>
+            </div>
+            <div class="kbd-badge">Cmd/Ctrl + Alt + M</div>
+          </div>
+
+          <div class="hotkey-item">
+            <div class="hotkey-info">
+              <h4>Simulate Typing Burst</h4>
+              <p>Instant shortcut to trigger intense coding activity animation state.</p>
+            </div>
+            <div class="kbd-badge">Cmd/Ctrl + Shift + K</div>
+          </div>
+
+          <div class="hotkey-item">
+            <div class="hotkey-info">
+              <h4>Double Click Mascot</h4>
+              <p>Pet the companion to give affection and celebrate (in interactive mode).</p>
+            </div>
+            <div class="kbd-badge">Double Click</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Simulator Tab -->
+      <section id="tab-simulator" class="tab-pane">
+        <div class="section-header">
+          <h3>State Simulator & Debugger</h3>
+          <p class="section-desc">Test all mascot animations and notification bubbles on demand.</p>
+        </div>
+
+        <div class="sim-grid">
+          <button class="sim-btn" data-action="work">
+            <span class="sim-icon">🔥</span>
+            <span>Trigger Work Mode</span>
+          </button>
+          <button class="sim-btn" data-action="idle">
+            <span class="sim-icon">☕</span>
+            <span>Trigger Idle Mode</span>
+          </button>
+          <button class="sim-btn" data-action="sleep">
+            <span class="sim-icon">💤</span>
+            <span>Trigger Sleep (Zzz)</span>
+          </button>
+          <button class="sim-btn" data-action="celebrate">
+            <span class="sim-icon">🎉</span>
+            <span>Celebrate!</span>
+          </button>
+          <button class="sim-btn" data-action="water">
+            <span class="sim-icon">💧</span>
+            <span>Test Water Reminder</span>
+          </button>
+          <button class="sim-btn" data-action="stretch">
+            <span class="sim-icon">🧘</span>
+            <span>Test Stretch Reminder</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Footer Buttons -->
+      <footer class="footer-actions">
+        <span id="save-status" class="save-status">All changes saved automatically</span>
+        <button id="btn-close" class="btn-primary">Done</button>
+      </footer>
+    </main>
+  </div>
+
+  <script src="settingsRenderer.js"></script>
+</body>
+</html>

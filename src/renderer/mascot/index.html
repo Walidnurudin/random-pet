@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hewan Njir Mascot</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>var exports = {};</script>
+</head>
+<body>
+  <div id="mascot-app" class="mascot-app">
+    <!-- Speech Bubble for health reminders & thoughts -->
+    <div id="speech-bubble" class="speech-bubble hidden">
+      <div id="speech-text" class="speech-text">Gass ngoding njir! 🔥</div>
+      <div class="speech-arrow"></div>
+    </div>
+
+    <!-- Interactive Mode Pill (Shows when click-through is disabled) -->
+    <div id="interactive-badge" class="interactive-badge hidden">
+      <span class="lock-icon">🔓</span>
+      <span class="badge-text">Interactive</span>
+    </div>
+
+    <!-- Main Mascot Interactive Canvas & Hitbox -->
+    <div id="mascot-container" class="mascot-container" title="Hewan Njir">
+      <canvas id="mascot-canvas" width="240" height="200"></canvas>
+      
+      <!-- Quick Action Floating Buttons (Visible in interactive mode) -->
+      <div id="quick-actions" class="quick-actions hidden">
+        <button id="btn-pet" class="action-btn" title="Pet Mascot">❤️</button>
+        <button id="btn-snack" class="action-btn" title="Give Coffee/Snack">☕</button>
+      </div>
+    </div>
+
+    <!-- Status indicator dot (Green: Work, Amber: Idle, Blue: Sleep) -->
+    <div id="status-indicator" class="status-indicator status-idle" title="Status"></div>
+  </div>
+
+  <script src="speechBubble.js"></script>
+  <script src="mascotRenderer.js"></script>
+</body>
+</html>
