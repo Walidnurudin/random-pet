@@ -67,8 +67,14 @@ export class TrayManager {
     const mascotLabels: Record<string, string> = {
       fox: '🦊 Kitsune Fox',
       cat: '🐱 Pixel Cat',
-      bot: '🤖 Cyber-Bot'
+      bot: '🤖 Cyber-Bot',
+      panda: '🐼 Begadang Panda',
+      penguin: '🐧 Tux Penguin',
+      doge: '🐕 Shiba Doge'
     };
+
+    const countdowns = this.reminderService.getCountdowns();
+    const stats = this.store.getHealthStats();
 
     const contextMenu = Menu.buildFromTemplate([
       {
@@ -80,6 +86,46 @@ export class TrayManager {
         enabled: false
       },
       { type: 'separator' },
+      {
+        label: '🌱 Health & Reminders',
+        submenu: [
+          {
+            label: `💧 Water: in ${countdowns.hydration.remainingMinutes}m (${stats.waterCount} cups today)`,
+            click: () => {
+              this.reminderService.acknowledgeReminder('hydration');
+              this.updateMenu();
+            }
+          },
+          {
+            label: `🧘 Stretch: in ${countdowns.stretch.remainingMinutes}m (${stats.stretchCount} done)`,
+            click: () => {
+              this.reminderService.acknowledgeReminder('stretch');
+              this.updateMenu();
+            }
+          },
+          {
+            label: `👀 Eye Rest: in ${countdowns.eyeRest.remainingMinutes}m`,
+            click: () => {
+              this.reminderService.triggerTestReminder('eyeRest');
+            }
+          },
+          { type: 'separator' },
+          {
+            label: '💧 Log Water Sip (+1 Cup)',
+            click: () => {
+              this.reminderService.acknowledgeReminder('hydration');
+              this.updateMenu();
+            }
+          },
+          {
+            label: '🧘 Completed Stretch (+1)',
+            click: () => {
+              this.reminderService.acknowledgeReminder('stretch');
+              this.updateMenu();
+            }
+          }
+        ]
+      },
       {
         label: isClickThrough ? '🔓 Enable Mouse Interaction' : '🔒 Enable Click-Through',
         accelerator: this.store.get('interactiveHotkey') || 'CommandOrControl+Alt+M',
@@ -108,6 +154,24 @@ export class TrayManager {
             type: 'radio',
             checked: currentMascot === 'bot',
             click: () => this.switchMascot('bot')
+          },
+          {
+            label: '🐼 Begadang Panda',
+            type: 'radio',
+            checked: currentMascot === 'panda',
+            click: () => this.switchMascot('panda')
+          },
+          {
+            label: '🐧 Tux Penguin',
+            type: 'radio',
+            checked: currentMascot === 'penguin',
+            click: () => this.switchMascot('penguin')
+          },
+          {
+            label: '🐕 Shiba Doge',
+            type: 'radio',
+            checked: currentMascot === 'doge',
+            click: () => this.switchMascot('doge')
           }
         ]
       },
@@ -138,6 +202,10 @@ export class TrayManager {
           {
             label: 'Send Stretch Reminder 🧘',
             click: () => this.reminderService.triggerTestReminder('stretch')
+          },
+          {
+            label: 'Send Eye Rest Reminder 👀',
+            click: () => this.reminderService.triggerTestReminder('eyeRest')
           }
         ]
       },

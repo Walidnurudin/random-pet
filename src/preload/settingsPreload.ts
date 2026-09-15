@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { AppSettings } from '../types';
+import { AppSettings, DailyHealthStats } from '../types';
 
 contextBridge.exposeInMainWorld('settingsApi', {
   getSettings: (): Promise<AppSettings> => ipcRenderer.invoke('settings:get-all'),
@@ -9,5 +9,7 @@ contextBridge.exposeInMainWorld('settingsApi', {
   triggerTestAction: (actionType: string, payload: Record<string, unknown> = {}) => {
     ipcRenderer.send('settings:test-action', { actionType, payload });
   },
-  closeWindow: () => ipcRenderer.send('settings:close')
+  closeWindow: () => ipcRenderer.send('settings:close'),
+  getHealthStats: (): Promise<DailyHealthStats> => ipcRenderer.invoke('reminder:get-stats')
 });
+

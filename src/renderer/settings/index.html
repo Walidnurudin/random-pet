@@ -86,6 +86,39 @@
               <span class="badge">Sci-Fi</span>
             </div>
           </label>
+
+          <!-- Panda Card -->
+          <label class="mascot-card">
+            <input type="radio" name="mascot-choice" value="panda">
+            <div class="card-inner">
+              <div class="mascot-emoji">🐼</div>
+              <h4>Begadang Panda</h4>
+              <p>Chubby nocturnal coder. Loves bamboo snacks and late-night commits.</p>
+              <span class="badge">Nocturnal</span>
+            </div>
+          </label>
+
+          <!-- Penguin Card -->
+          <label class="mascot-card">
+            <input type="radio" name="mascot-choice" value="penguin">
+            <div class="card-inner">
+              <div class="mascot-emoji">🐧</div>
+              <h4>Tux Penguin</h4>
+              <p>Linux server connoisseur. Wobbly flipper steps and winter developer scarf.</p>
+              <span class="badge">Linux Sysadmin</span>
+            </div>
+          </label>
+
+          <!-- Doge Card -->
+          <label class="mascot-card">
+            <input type="radio" name="mascot-choice" value="doge">
+            <div class="card-inner">
+              <div class="mascot-emoji">🐕</div>
+              <h4>Shiba Doge</h4>
+              <p>High energy, much happiness! Wagging doughnut tail and cheerful barking.</p>
+              <span class="badge">Energetic</span>
+            </div>
+          </label>
         </div>
 
         <div class="card-setting">
@@ -139,6 +172,33 @@
           <p class="section-desc">Keep healthy while shipping features. The mascot will notify you gently.</p>
         </div>
 
+        <!-- Today's Wellness Summary Banner -->
+        <div class="stats-summary-card">
+          <div class="stat-item">
+            <span class="stat-icon">💧</span>
+            <div class="stat-info">
+              <span class="stat-number" id="stats-water-count">0</span>
+              <span class="stat-title">Cups Drunk Today</span>
+            </div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-icon">🧘</span>
+            <div class="stat-info">
+              <span class="stat-number" id="stats-stretch-count">0</span>
+              <span class="stat-title">Stretches Done</span>
+            </div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-icon">👀</span>
+            <div class="stat-info">
+              <span class="stat-number" id="stats-eye-count">0</span>
+              <span class="stat-title">Eye Rests</span>
+            </div>
+          </div>
+        </div>
+
         <div class="card-setting">
           <div class="setting-text">
             <h4>Enable Health Reminders</h4>
@@ -148,6 +208,54 @@
             <input type="checkbox" id="setting-reminders-enabled" checked>
             <span class="slider"></span>
           </label>
+        </div>
+
+        <div class="settings-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>🎭 Mascot Tone / Personality</h4>
+              <p>Choose how Hewan Njir reminds you to stay healthy.</p>
+            </div>
+            <select id="setting-reminder-tone" class="dropdown-select">
+              <option value="slang">Indo Slang ("Njir / Bro")</option>
+              <option value="gentle">Wholesome & Gentle</option>
+              <option value="discipline">Drill Sergeant (Discipline)</option>
+              <option value="tech">Tech & Programmer Humor</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>🧠 Smart Inactivity Pausing</h4>
+              <p>Only count active hours; pause timers when AFK or asleep.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-smart-reminders" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>⚡ Flow-State Protection</h4>
+              <p>Delay reminders by 2 minutes when typing intensely.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-flow-protection" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>🔔 Gentle Audio Chimes</h4>
+              <p>Play subtle water droplet and pleasant notification chimes.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-reminder-sound" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
         </div>
 
         <div class="settings-card">
@@ -193,29 +301,21 @@
           <p class="section-desc">Shortcuts to interact with Hewan Njir without disrupting your code editor.</p>
         </div>
 
-        <div class="hotkey-list">
-          <div class="hotkey-item">
-            <div class="hotkey-info">
-              <h4>Toggle Mouse Click-Through</h4>
-              <p>Allows clicking and dragging the mascot or making it completely click-through.</p>
+        <div class="settings-card">
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>Toggle Mouse Interactive Mode</h4>
+              <p>Temporarily disable click-through to pet, feed, or drag the mascot.</p>
             </div>
-            <div class="kbd-badge">Cmd/Ctrl + Alt + M</div>
+            <span class="hotkey-badge">Cmd/Ctrl + Alt + M</span>
           </div>
 
-          <div class="hotkey-item">
-            <div class="hotkey-info">
-              <h4>Simulate Typing Burst</h4>
-              <p>Instant shortcut to trigger intense coding activity animation state.</p>
+          <div class="setting-row">
+            <div class="setting-text">
+              <h4>Simulate Fast Typing (Work Mode)</h4>
+              <p>Quick burst to put mascot into intense coding state.</p>
             </div>
-            <div class="kbd-badge">Cmd/Ctrl + Shift + K</div>
-          </div>
-
-          <div class="hotkey-item">
-            <div class="hotkey-info">
-              <h4>Double Click Mascot</h4>
-              <p>Pet the companion to give affection and celebrate (in interactive mode).</p>
-            </div>
-            <div class="kbd-badge">Double Click</div>
+            <span class="hotkey-badge">Cmd/Ctrl + Shift + K</span>
           </div>
         </div>
       </section>
@@ -223,18 +323,18 @@
       <!-- 5. Simulator Tab -->
       <section id="tab-simulator" class="tab-pane">
         <div class="section-header">
-          <h3>State Simulator & Debugger</h3>
-          <p class="section-desc">Test all mascot animations and notification bubbles on demand.</p>
+          <h3>Mascot State Simulator</h3>
+          <p class="section-desc">Test mascot animations, particle effects, and speech prompts immediately.</p>
         </div>
 
-        <div class="sim-grid">
+        <div class="simulator-grid">
           <button class="sim-btn" data-action="work">
             <span class="sim-icon">🔥</span>
-            <span>Trigger Work Mode</span>
+            <span>Trigger Work (Coding)</span>
           </button>
           <button class="sim-btn" data-action="idle">
             <span class="sim-icon">☕</span>
-            <span>Trigger Idle Mode</span>
+            <span>Trigger Idle (Chill)</span>
           </button>
           <button class="sim-btn" data-action="sleep">
             <span class="sim-icon">💤</span>
@@ -251,6 +351,10 @@
           <button class="sim-btn" data-action="stretch">
             <span class="sim-icon">🧘</span>
             <span>Test Stretch Reminder</span>
+          </button>
+          <button class="sim-btn" data-action="eyeRest">
+            <span class="sim-icon">👀</span>
+            <span>Test Eye Rest</span>
           </button>
         </div>
       </section>

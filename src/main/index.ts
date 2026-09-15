@@ -25,7 +25,7 @@ app.whenReady().then(() => {
   store = getStore();
   windowManager = new WindowManager(store);
   activityMonitor = new ActivityMonitor(store);
-  reminderService = new ReminderService(store);
+  reminderService = new ReminderService(store, activityMonitor);
   trayManager = new TrayManager(windowManager, activityMonitor, reminderService, store);
 
   windowManager.createMascotWindow();
@@ -40,6 +40,16 @@ app.whenReady().then(() => {
 
   reminderService.on('reminder', (reminderData: ReminderNotification) => {
     windowManager.sendToMascot('reminder-notification', reminderData);
+  });
+
+  reminderService.on('health-stats-updated', (stats) => {
+    windowManager.sendToMascot('health-stats-update', stats);
+    trayManager.updateMenu();
+  });
+
+  reminderService.on('celebration-feedback', (data) => {
+    activityMonitor.forceState('celebrate', 4000);
+    windowManager.sendToMascot('celebration-feedback', data);
   });
 
   registerGlobalShortcuts();
@@ -89,7 +99,9 @@ function setupIpcHandlers(): void {
       snapshot: activityMonitor.getCurrentSnapshot(),
       isClickThrough: windowManager.isClickThrough,
       mascot: store.get('mascot'),
-      speechBubblesEnabled: store.get('speechBubblesEnabled')
+      speechBubblesEnabled: store.get('speechBubblesEnabled'),
+      healthStats: store.getHealthStats(),
+      reminderSoundEnabled: store.get('reminderSoundEnabled') ?? true
     };
   });
 
@@ -110,6 +122,23 @@ function setupIpcHandlers(): void {
   ipcMain.on('mascot:feed', () => {
     activityMonitor.forceState('celebrate', 4000);
     trayManager.updateMenu();
+  });
+
+  ipcMain.on('reminder:acknowledge', (_event, { type }: { type: 'hydration' | 'stretch' | 'eyeRest' }) => {
+    reminderService.acknowledgeReminder(type);
+    trayManager.updateMenu();
+  });
+
+  ipcMain.on('reminder:snooze', (_event, { type, minutes }: { type: 'hydration' | 'stretch' | 'eyeRest'; minutes?: number }) => {
+    reminderService.snoozeReminder(type, minutes || 5);
+  });
+
+  ipcMain.handle('reminder:get-stats', () => {
+    return store.getHealthStats();
+  });
+
+  ipcMain.handle('reminder:get-countdowns', () => {
+    return reminderService.getCountdowns();
   });
 
   ipcMain.handle('settings:get-all', () => {

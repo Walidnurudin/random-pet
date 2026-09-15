@@ -48,10 +48,68 @@ html, body {
   pointer-events: none;
 }
 
+.speech-bubble.has-actions {
+  pointer-events: auto;
+  cursor: default;
+}
+
 .speech-bubble.hidden {
   opacity: 0;
   transform: translateY(8px) scale(0.9);
   pointer-events: none;
+}
+
+.speech-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.speech-actions.hidden {
+  display: none !important;
+}
+
+.bubble-btn {
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+
+.bubble-btn:active {
+  transform: scale(0.94);
+}
+
+.bubble-btn-primary {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 114, 255, 0.4);
+}
+
+.bubble-btn-primary:hover {
+  background: linear-gradient(135deg, #1ad1ff, #1a82ff);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 114, 255, 0.5);
+}
+
+.bubble-btn-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #d1d5db;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.bubble-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .speech-arrow {

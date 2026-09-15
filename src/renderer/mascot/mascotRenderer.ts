@@ -21,6 +21,97 @@ interface ZzzParticle {
   text: string;
 }
 
+class SoundSynth {
+  private ctx: AudioContext | null = null;
+  public enabled: boolean = true;
+
+  private getContext(): AudioContext | null {
+    if (!this.enabled) return null;
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+    return this.ctx;
+  }
+
+  public playWaterDrop(): void {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(650, now);
+      osc.frequency.exponentialRampToValueAtTime(1250, now + 0.08);
+
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.16);
+    } catch (e) {}
+  }
+
+  public playChime(): void {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      [587.33, 880].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + i * 0.05);
+
+        gain.gain.setValueAtTime(0.12, now + i * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.4);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + i * 0.05);
+        osc.stop(now + i * 0.05 + 0.42);
+      });
+    } catch (e) {}
+  }
+
+  public playCelebration(): void {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+
+        gain.gain.setValueAtTime(0.15, now + idx * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + idx * 0.07);
+        osc.stop(now + idx * 0.07 + 0.32);
+      });
+    } catch (e) {}
+  }
+}
+
 export class MascotRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
@@ -44,6 +135,7 @@ export class MascotRenderer {
   private lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
   private width: number = 240;
   private height: number = 190;
+  private soundSynth: SoundSynth = new SoundSynth();
 
   constructor() {
     this.canvas = document.getElementById('mascot-canvas') as HTMLCanvasElement;
@@ -80,6 +172,7 @@ export class MascotRenderer {
       const init = await window.hewanNjir.getInitialState();
       if (init) {
         this.currentMascot = init.mascot || 'fox';
+        this.soundSynth.enabled = init.reminderSoundEnabled ?? true;
         this.setInteractiveMode(!init.isClickThrough);
         if (init.snapshot) {
           this.updateState(init.snapshot.state, init.snapshot.typingIntensity);
@@ -96,18 +189,44 @@ export class MascotRenderer {
     window.hewanNjir.onMascotChange((data: { mascot: MascotType }) => {
       if (data.mascot) {
         this.currentMascot = data.mascot;
-        this.spawnBurstParticles(15, '#ff9e40');
+        const greetings: Record<MascotType, { text: string; color: string }> = {
+          fox: { text: 'Kitsune Fox siap temenin ngoding! 🦊🔥', color: '#ff7a00' },
+          cat: { text: 'Meow! Pixel Cat siap santuy nemenin debug! 🐱💤', color: '#929cb8' },
+          bot: { text: 'BEEP BOOP! Cyber-Bot online and ready to compute! 🤖⚡', color: '#00e5ff' },
+          panda: { text: 'Halo! Begadang Panda siap ngoding semaleman! 🐼🎋', color: '#10b981' },
+          penguin: { text: 'Kwak kwak! Tux Penguin siap deploy ke Linux! 🐧❄️', color: '#38bdf8' },
+          doge: { text: 'Much code! Very developer! Shiba Doge is here! 🐕✨', color: '#f59e0b' }
+        };
+        const info = greetings[data.mascot] || { text: `Halo! Sekarang ganti ke ${this.currentMascot.toUpperCase()}! 🐾`, color: '#ff9e40' };
+        this.spawnBurstParticles(20, info.color);
         if (window.speechBubble) {
-          window.speechBubble.show(`Halo! Sekarang ganti ke ${this.currentMascot.toUpperCase()}! 🐾`, 3500);
+          window.speechBubble.show(info.text, 3500);
         }
       }
     });
 
     window.hewanNjir.onReminder((reminder: ReminderNotification) => {
       if (window.speechBubble) {
-        window.speechBubble.show(reminder.message, 5000);
+        window.speechBubble.showReminder(reminder);
       }
-      this.spawnBurstParticles(20, '#00e5ff');
+      if (reminder.type === 'hydration') {
+        this.spawnBurstParticles(25, '#00e5ff');
+        this.soundSynth.playWaterDrop();
+      } else if (reminder.type === 'stretch') {
+        this.spawnBurstParticles(20, '#ffb300');
+        this.soundSynth.playChime();
+      } else {
+        this.spawnBurstParticles(20, '#a78bfa');
+        this.soundSynth.playChime();
+      }
+    });
+
+    window.hewanNjir.onCelebrationFeedback((data) => {
+      this.soundSynth.playCelebration();
+      this.spawnBurstParticles(30, '#ffd700');
+      if (window.speechBubble) {
+        window.speechBubble.show(data.praise, 4000);
+      }
     });
 
     window.hewanNjir.onInteractiveModeChange((data: { interactive: boolean }) => {
@@ -189,43 +308,57 @@ export class MascotRenderer {
   }
 
   public pet(): void {
-    this.spawnBurstParticles(18, '#ff4081', '❤️');
-    if (window.speechBubble) {
-      window.speechBubble.show('Purrrr... Makasih udah dielus! ❤️', 3000);
-    }
     if (window.hewanNjir) {
       window.hewanNjir.petMascot();
+    }
+    this.spawnBurstParticles(25, '#ff4081', '❤️');
+    if (window.speechBubble) {
+      const petQuotes = [
+        'Hehe, makasih elusannya njir! 🥰',
+        'Purrr... Tambah semangat ngoding! ✨',
+        'Aww, makin sayang sama developer ini! ❤️'
+      ];
+      window.speechBubble.show(petQuotes[Math.floor(Math.random() * petQuotes.length)], 3500);
     }
   }
 
   public feed(): void {
-    this.spawnBurstParticles(18, '#795548', '☕');
-    if (window.speechBubble) {
-      window.speechBubble.show('Mantap kopinya njir! Stamina +100 ☕⚡', 3500);
-    }
     if (window.hewanNjir) {
       window.hewanNjir.feedMascot();
+    }
+    this.spawnBurstParticles(20, '#ffab00', '☕');
+    if (window.speechBubble) {
+      const feedQuotes = [
+        'Nyam nyam nyam! Kopi & snack recharged! ☕⚡',
+        'Kafein masuk, bug auto mental! 🔥',
+        'Enak bener snack-nya njir! Mantap! 🍪'
+      ];
+      window.speechBubble.show(feedQuotes[Math.floor(Math.random() * feedQuotes.length)], 3500);
     }
   }
 
   public spawnBurstParticles(count: number, color: string, char: string | null = null): void {
+    const cx = this.width / 2;
+    const cy = this.height / 2 + 10;
     for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 3.5 + 1.5;
       this.particles.push({
-        x: this.width / 2 + (Math.random() - 0.5) * 40,
-        y: this.height / 2 + 10 + (Math.random() - 0.5) * 20,
-        vx: (Math.random() - 0.5) * 5,
-        vy: -Math.random() * 4 - 2,
-        size: Math.random() * 6 + 3,
-        color,
-        char,
+        x: cx + (Math.random() - 0.5) * 20,
+        y: cy + (Math.random() - 0.5) * 20,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.2,
+        size: Math.random() * 4 + 2,
+        color: color,
+        char: char,
         alpha: 1,
-        life: 1
+        life: Math.random() * 0.4 + 0.6
       });
     }
   }
 
-  private loop(currentTime: number): void {
-    this.time = currentTime * 0.003;
+  private loop(timestamp: number): void {
+    this.time = timestamp * 0.001;
 
     this.blinkTimer++;
     if (this.blinkTimer > 180 + Math.random() * 100) {
@@ -243,8 +376,14 @@ export class MascotRenderer {
       this.renderFox();
     } else if (this.currentMascot === 'cat') {
       this.renderCat();
-    } else {
+    } else if (this.currentMascot === 'bot') {
       this.renderCyberBot();
+    } else if (this.currentMascot === 'panda') {
+      this.renderPanda();
+    } else if (this.currentMascot === 'penguin') {
+      this.renderPenguin();
+    } else if (this.currentMascot === 'doge') {
+      this.renderDoge();
     }
     this.ctx.restore();
 
@@ -480,6 +619,416 @@ export class MascotRenderer {
     ctx.shadowBlur = 12;
     ctx.fill();
     ctx.shadowBlur = 0;
+  }
+
+  private renderPanda(): void {
+    const ctx = this.ctx;
+    const cx = this.width / 2;
+    const cy = this.height / 2 + 20;
+
+    let breath = Math.sin(this.time * 2.0) * 2;
+    let bounce = this.state === 'work' ? Math.abs(Math.sin(this.time * 10)) * 2.5 : 0;
+    if (this.state === 'celebrate') bounce = Math.abs(Math.sin(this.time * 8)) * 11;
+    const yPos = cy - bounce + breath;
+
+    // Small black tail nub
+    ctx.beginPath();
+    ctx.arc(cx - 30, yPos + 22, 7, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e2026';
+    ctx.fill();
+
+    // Body (White chubby belly)
+    ctx.beginPath();
+    ctx.ellipse(cx, yPos + 22, 36, 29, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#f8fafc';
+    ctx.fill();
+
+    // Black shoulder band & arms
+    ctx.beginPath();
+    ctx.ellipse(cx, yPos + 14, 35, 12, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e2026';
+    ctx.fill();
+
+    // Black ears
+    const earWiggle = this.state === 'work' ? Math.sin(this.time * 10) * 0.08 : 0;
+    ctx.save();
+    ctx.translate(cx - 24, yPos - 30);
+    ctx.rotate(-0.2 + earWiggle);
+    ctx.beginPath();
+    ctx.arc(0, 0, 11, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e2026';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, 0, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#334155';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(cx + 24, yPos - 30);
+    ctx.rotate(0.2 - earWiggle);
+    ctx.beginPath();
+    ctx.arc(0, 0, 11, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e2026';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, 0, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#334155';
+    ctx.fill();
+    ctx.restore();
+
+    // Head (Chubby white face)
+    ctx.beginPath();
+    ctx.arc(cx, yPos - 8, 33, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Cheeks
+    ctx.beginPath();
+    ctx.arc(cx - 24, yPos - 3, 11, 0, Math.PI * 2);
+    ctx.arc(cx + 24, yPos - 3, 11, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    // Eye Patches (Tilted black ovals)
+    ctx.beginPath();
+    ctx.ellipse(cx - 15, yPos - 11, 10, 8, -0.3, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e2026';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.ellipse(cx + 15, yPos - 11, 10, 8, 0.3, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e2026';
+    ctx.fill();
+
+    // Eyes inside patches
+    if (this.state === 'sleep') {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx - 15, yPos - 10, 5, 0.8 * Math.PI, 0.2 * Math.PI, true);
+      ctx.arc(cx + 15, yPos - 10, 5, 0.8 * Math.PI, 0.2 * Math.PI, true);
+      ctx.stroke();
+    } else if (this.state === 'celebrate') {
+      this.drawStar(cx - 15, yPos - 11, 4, 7, 3, '#fef08a');
+      this.drawStar(cx + 15, yPos - 11, 4, 7, 3, '#fef08a');
+    } else if (this.isBlinking) {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 19, yPos - 11); ctx.lineTo(cx - 11, yPos - 11);
+      ctx.moveTo(cx + 11, yPos - 11); ctx.lineTo(cx + 19, yPos - 11);
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx - 15, yPos - 11, 3.5, 0, Math.PI * 2);
+      ctx.arc(cx + 15, yPos - 11, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(cx - 14.5, yPos - 11, 2.2, 0, Math.PI * 2);
+      ctx.arc(cx + 14.5, yPos - 11, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx - 15.5, yPos - 12, 1, 0, Math.PI * 2);
+      ctx.arc(cx + 13.5, yPos - 12, 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Rosy Blush
+    ctx.fillStyle = 'rgba(251, 113, 133, 0.35)';
+    ctx.beginPath();
+    ctx.arc(cx - 23, yPos - 2, 5.5, 0, Math.PI * 2);
+    ctx.arc(cx + 23, yPos - 2, 5.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Nose & smiling mouth
+    ctx.beginPath();
+    ctx.arc(cx, yPos - 2, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e2026';
+    ctx.fill();
+
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.arc(cx - 3, yPos + 2, 3, 0.1 * Math.PI, 0.9 * Math.PI);
+    ctx.arc(cx + 3, yPos + 2, 3, 0.1 * Math.PI, 0.9 * Math.PI);
+    ctx.stroke();
+
+    // Paws & Props
+    if (this.state === 'work') {
+      this.drawMiniKeyboard(cx, yPos + 38);
+      const lPaw = yPos + 26 + Math.sin(this.time * 15) * 4;
+      const rPaw = yPos + 26 + Math.cos(this.time * 15) * 4;
+      this.drawPaw(cx - 16, lPaw, '#1e2026');
+      this.drawPaw(cx + 16, rPaw, '#1e2026');
+    } else if (this.state === 'celebrate') {
+      // Holding bamboo shoot
+      ctx.save();
+      ctx.strokeStyle = '#16a34a';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(cx - 28, yPos + 18);
+      ctx.lineTo(cx - 24, yPos - 14);
+      ctx.stroke();
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.ellipse(cx - 22, yPos - 16, 6, 3, -0.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      this.drawPaw(cx - 22, yPos - 2, '#1e2026');
+      this.drawPaw(cx + 22, yPos - 2, '#1e2026');
+    } else {
+      this.drawPaw(cx - 15, yPos + 36, '#1e2026');
+      this.drawPaw(cx + 15, yPos + 36, '#1e2026');
+    }
+  }
+
+  private renderPenguin(): void {
+    const ctx = this.ctx;
+    const cx = this.width / 2;
+    const cy = this.height / 2 + 20;
+
+    let breath = Math.sin(this.time * 2.2) * 2;
+    let waddle = this.state === 'work' || this.state === 'celebrate' ? Math.sin(this.time * 10) * 0.07 : Math.sin(this.time * 3) * 0.03;
+    let bounce = this.state === 'work' ? Math.abs(Math.sin(this.time * 10)) * 2.5 : 0;
+    if (this.state === 'celebrate') bounce = Math.abs(Math.sin(this.time * 8)) * 12;
+    const yPos = cy - bounce + breath;
+
+    ctx.save();
+    ctx.translate(cx, yPos);
+    ctx.rotate(waddle);
+    ctx.translate(-cx, -yPos);
+
+    // Orange flipper feet at bottom
+    ctx.fillStyle = '#f97316';
+    ctx.beginPath();
+    ctx.ellipse(cx - 15, yPos + 40, 11, 6, -0.2, 0, Math.PI * 2);
+    ctx.ellipse(cx + 15, yPos + 40, 11, 6, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Body (Dark slate navy/black)
+    ctx.beginPath();
+    ctx.ellipse(cx, yPos + 18, 35, 29, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#0f172a';
+    ctx.fill();
+
+    // Head
+    ctx.beginPath();
+    ctx.arc(cx, yPos - 10, 29, 0, Math.PI * 2);
+    ctx.fillStyle = '#0f172a';
+    ctx.fill();
+
+    // White Belly
+    ctx.beginPath();
+    ctx.ellipse(cx, yPos + 20, 23, 24, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    // White face mask patches around eyes
+    ctx.beginPath();
+    ctx.ellipse(cx - 11, yPos - 12, 10, 13, -0.1, 0, Math.PI * 2);
+    ctx.ellipse(cx + 11, yPos - 12, 10, 13, 0.1, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    // Cyan Developer Scarf
+    ctx.fillStyle = '#06b6d4';
+    ctx.beginPath();
+    ctx.rect(cx - 24, yPos + 2, 48, 11);
+    ctx.fill();
+    // Scarf tail hanging down
+    ctx.fillStyle = '#0891b2';
+    ctx.beginPath();
+    ctx.rect(cx + 10, yPos + 10, 9, 14);
+    ctx.fill();
+
+    // Eyes
+    this.drawEyes(cx, yPos - 13, 11);
+
+    // Blush
+    ctx.fillStyle = 'rgba(251, 113, 133, 0.4)';
+    ctx.beginPath();
+    ctx.arc(cx - 19, yPos - 4, 4.5, 0, Math.PI * 2);
+    ctx.arc(cx + 19, yPos - 4, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Bright triangular orange beak
+    ctx.beginPath();
+    ctx.moveTo(cx - 7, yPos - 6);
+    ctx.lineTo(cx + 7, yPos - 6);
+    ctx.lineTo(cx, yPos + 1);
+    ctx.closePath();
+    ctx.fillStyle = '#ea580c';
+    ctx.fill();
+
+    // Wings (Flippers)
+    if (this.state === 'work') {
+      this.drawMiniKeyboard(cx, yPos + 38);
+      const lWingY = yPos + 20 + Math.sin(this.time * 16) * 4;
+      const rWingY = yPos + 20 + Math.cos(this.time * 16) * 4;
+      ctx.save();
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.ellipse(cx - 24, lWingY, 8, 14, 0.4, 0, Math.PI * 2);
+      ctx.ellipse(cx + 24, rWingY, 8, 14, -0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else if (this.state === 'celebrate') {
+      ctx.save();
+      const flap = Math.sin(this.time * 18) * 0.4;
+      ctx.translate(cx - 28, yPos + 6);
+      ctx.rotate(-0.8 + flap);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 7, 16, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(cx + 28, yPos + 6);
+      ctx.rotate(0.8 - flap);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 7, 16, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.ellipse(cx - 28, yPos + 18, 7, 16, 0.25, 0, Math.PI * 2);
+      ctx.ellipse(cx + 28, yPos + 18, 7, 16, -0.25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  private renderDoge(): void {
+    const ctx = this.ctx;
+    const cx = this.width / 2;
+    const cy = this.height / 2 + 20;
+
+    let breath = Math.sin(this.time * 2.5) * 2;
+    let bounce = this.state === 'work' ? Math.abs(Math.sin(this.time * 12)) * 3 : 0;
+    if (this.state === 'celebrate') bounce = Math.abs(Math.sin(this.time * 9)) * 12;
+    const yPos = cy - bounce + breath;
+
+    // Cinnamon roll tail wagging
+    ctx.save();
+    const tailWag = Math.sin(this.time * (this.state === 'work' ? 14 : this.state === 'celebrate' ? 22 : 6)) * 0.4;
+    ctx.translate(cx + 26, yPos + 14);
+    ctx.rotate(tailWag);
+    ctx.beginPath();
+    ctx.arc(12, -10, 14, 0.2 * Math.PI, 1.8 * Math.PI);
+    ctx.lineWidth = 9;
+    ctx.strokeStyle = '#d97706';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(10, -12, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fffbeb';
+    ctx.fill();
+    ctx.restore();
+
+    // Body (Golden-wheat doge body)
+    ctx.beginPath();
+    ctx.ellipse(cx, yPos + 20, 36, 28, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#d97706';
+    ctx.fill();
+
+    // White Chest Fluff
+    ctx.beginPath();
+    ctx.ellipse(cx, yPos + 24, 20, 18, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#fffbeb';
+    ctx.fill();
+
+    // Head
+    ctx.beginPath();
+    ctx.arc(cx, yPos - 10, 31, 0, Math.PI * 2);
+    ctx.fillStyle = '#d97706';
+    ctx.fill();
+
+    // White Cheeks & Muzzle
+    ctx.beginPath();
+    ctx.arc(cx - 18, yPos - 4, 13, 0, Math.PI * 2);
+    ctx.arc(cx + 18, yPos - 4, 13, 0, Math.PI * 2);
+    ctx.fillStyle = '#fffbeb';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.ellipse(cx, yPos - 3, 14, 11, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#fffbeb';
+    ctx.fill();
+
+    // Shiba Ears
+    const earWiggle = this.state === 'work' ? Math.sin(this.time * 12) * 0.08 : 0;
+    this.drawEar(cx - 20, yPos - 34, -0.25 + earWiggle, '#d97706', '#fbcfe8');
+    this.drawEar(cx + 20, yPos - 34, 0.25 - earWiggle, '#d97706', '#fbcfe8');
+
+    // Distinctive White Eyebrow Dots (Classic Shiba feature!)
+    ctx.fillStyle = '#fffbeb';
+    ctx.beginPath();
+    ctx.arc(cx - 13, yPos - 22, 3.5, 0, Math.PI * 2);
+    ctx.arc(cx + 13, yPos - 22, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eyes
+    this.drawEyes(cx, yPos - 13, 13);
+
+    // Black Button Nose
+    ctx.beginPath();
+    ctx.arc(cx, yPos - 6, 3.8, 0, Math.PI * 2);
+    ctx.fillStyle = '#1e293b';
+    ctx.fill();
+
+    // Mouth & Pink Tongue
+    if (this.state === 'celebrate' || this.state === 'idle') {
+      ctx.beginPath();
+      ctx.arc(cx, yPos + 1, 7, 0, Math.PI);
+      ctx.fillStyle = '#be123c';
+      ctx.fill();
+
+      // Tongue
+      const tongueWiggle = Math.sin(this.time * 6) * 1;
+      ctx.beginPath();
+      ctx.ellipse(cx + tongueWiggle, yPos + 5, 4.5, 5.5, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#fb7185';
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(cx - 3, yPos - 1, 3.5, 0.1 * Math.PI, 0.9 * Math.PI);
+      ctx.arc(cx + 3, yPos - 1, 3.5, 0.1 * Math.PI, 0.9 * Math.PI);
+      ctx.stroke();
+    }
+
+    // Paws
+    if (this.state === 'work') {
+      this.drawMiniKeyboard(cx, yPos + 38);
+      const lPaw = yPos + 26 + Math.sin(this.time * 16) * 4;
+      const rPaw = yPos + 26 + Math.cos(this.time * 16) * 4;
+      this.drawPaw(cx - 15, lPaw, '#fffbeb');
+      this.drawPaw(cx + 15, rPaw, '#fffbeb');
+    } else if (this.state === 'celebrate') {
+      this.drawPaw(cx - 24, yPos - 2, '#fffbeb');
+      this.drawPaw(cx + 24, yPos - 2, '#fffbeb');
+    } else {
+      this.drawPaw(cx - 14, yPos + 36, '#fffbeb');
+      this.drawPaw(cx + 14, yPos + 36, '#fffbeb');
+    }
   }
 
   private drawEar(x: number, y: number, angle: number, outerColor: string, innerColor: string): void {

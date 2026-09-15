@@ -1,4 +1,4 @@
-import { AppSettings, MascotType } from '../../types';
+import { AppSettings, DailyHealthStats, MascotType, ReminderTone } from '../../types';
 
 export class SettingsController {
   private saveTimeout: NodeJS.Timeout | null = null;
@@ -10,6 +10,7 @@ export class SettingsController {
     this.initFormControls();
     this.initSimulator();
     this.loadSettings();
+    this.loadHealthStats();
   }
 
   private initTabs(): void {
@@ -27,8 +28,29 @@ export class SettingsController {
           const targetPane = document.getElementById(targetId);
           if (targetPane) targetPane.classList.add('active');
         }
+        if (targetId === 'tab-reminders') {
+          this.loadHealthStats();
+        }
       });
     });
+  }
+
+  private async loadHealthStats(): Promise<void> {
+    if (!window.settingsApi?.getHealthStats) return;
+    try {
+      const stats: DailyHealthStats = await window.settingsApi.getHealthStats();
+      if (stats) {
+        const waterEl = document.getElementById('stats-water-count');
+        const stretchEl = document.getElementById('stats-stretch-count');
+        const eyeEl = document.getElementById('stats-eye-count');
+
+        if (waterEl) waterEl.textContent = String(stats.waterCount || 0);
+        if (stretchEl) stretchEl.textContent = String(stats.stretchCount || 0);
+        if (eyeEl) eyeEl.textContent = String(stats.eyeRestCount || 0);
+      }
+    } catch (e) {
+      console.warn('Failed to fetch health stats in settings:', e);
+    }
   }
 
   private async loadSettings(): Promise<void> {
@@ -67,6 +89,20 @@ export class SettingsController {
 
       const remEnabledEl = document.getElementById('setting-reminders-enabled') as HTMLInputElement | null;
       if (remEnabledEl) remEnabledEl.checked = !!config.remindersEnabled;
+
+      const toneEl = document.getElementById('setting-reminder-tone') as HTMLSelectElement | null;
+      if (toneEl && config.reminderTone) {
+        toneEl.value = config.reminderTone;
+      }
+
+      const smartRemEl = document.getElementById('setting-smart-reminders') as HTMLInputElement | null;
+      if (smartRemEl) smartRemEl.checked = config.smartRemindersEnabled ?? true;
+
+      const flowEl = document.getElementById('setting-flow-protection') as HTMLInputElement | null;
+      if (flowEl) flowEl.checked = config.flowProtectionEnabled ?? true;
+
+      const soundEl = document.getElementById('setting-reminder-sound') as HTMLInputElement | null;
+      if (soundEl) soundEl.checked = config.reminderSoundEnabled ?? true;
 
       const hydEl = document.getElementById('setting-hydration-interval') as HTMLInputElement | null;
       const hydLabel = document.getElementById('label-hydration-interval');
@@ -117,11 +153,22 @@ export class SettingsController {
       radio.addEventListener('change', () => this.queueSave());
     });
 
-    const checkboxes = ['setting-speech-bubbles', 'setting-reminders-enabled'];
+    const checkboxes = [
+      'setting-speech-bubbles',
+      'setting-reminders-enabled',
+      'setting-smart-reminders',
+      'setting-flow-protection',
+      'setting-reminder-sound'
+    ];
     checkboxes.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('change', () => this.queueSave());
     });
+
+    const toneSelect = document.getElementById('setting-reminder-tone');
+    if (toneSelect) {
+      toneSelect.addEventListener('change', () => this.queueSave());
+    }
 
     const btnClose = document.getElementById('btn-close');
     if (btnClose) {
@@ -141,6 +188,7 @@ export class SettingsController {
         if (window.settingsApi && action) {
           window.settingsApi.triggerTestAction(action);
           this.flashStatus(`Triggered action: ${action.toUpperCase()}`);
+          setTimeout(() => this.loadHealthStats(), 600);
         }
       });
     });
@@ -168,6 +216,10 @@ export class SettingsController {
     const idleThreshold = parseInt((document.getElementById('setting-idle-threshold') as HTMLInputElement)?.value || '30', 10);
     const sleepThreshold = parseInt((document.getElementById('setting-sleep-threshold') as HTMLInputElement)?.value || '120', 10);
     const remindersEnabled = (document.getElementById('setting-reminders-enabled') as HTMLInputElement)?.checked ?? true;
+    const reminderTone = (document.getElementById('setting-reminder-tone') as HTMLSelectElement)?.value as ReminderTone || 'slang';
+    const smartRemindersEnabled = (document.getElementById('setting-smart-reminders') as HTMLInputElement)?.checked ?? true;
+    const flowProtectionEnabled = (document.getElementById('setting-flow-protection') as HTMLInputElement)?.checked ?? true;
+    const reminderSoundEnabled = (document.getElementById('setting-reminder-sound') as HTMLInputElement)?.checked ?? true;
     const hydrationInterval = parseInt((document.getElementById('setting-hydration-interval') as HTMLInputElement)?.value || '45', 10);
     const stretchInterval = parseInt((document.getElementById('setting-stretch-interval') as HTMLInputElement)?.value || '75', 10);
     const eyeRestInterval = parseInt((document.getElementById('setting-eye-interval') as HTMLInputElement)?.value || '20', 10);
@@ -178,6 +230,10 @@ export class SettingsController {
       idleThresholdSeconds: idleThreshold,
       sleepThresholdSeconds: sleepThreshold,
       remindersEnabled,
+      reminderTone,
+      smartRemindersEnabled,
+      flowProtectionEnabled,
+      reminderSoundEnabled,
       hydrationIntervalMinutes: hydrationInterval,
       stretchIntervalMinutes: stretchInterval,
       eyeRestIntervalMinutes: eyeRestInterval
@@ -203,3 +259,4 @@ export class SettingsController {
 window.addEventListener('DOMContentLoaded', () => {
   new SettingsController();
 });
+

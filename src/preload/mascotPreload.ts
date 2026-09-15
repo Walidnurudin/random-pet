@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { ActivitySnapshot, MascotType, ReminderNotification } from '../types';
+import { ActivitySnapshot, DailyHealthStats, MascotType, ReminderNotification } from '../types';
 
 contextBridge.exposeInMainWorld('hewanNjir', {
   onActivityUpdate: (callback: (data: ActivitySnapshot) => void) => {
@@ -17,6 +17,24 @@ contextBridge.exposeInMainWorld('hewanNjir', {
     ipcRenderer.on('reminder-notification', subscription);
     return () => {
       ipcRenderer.removeListener('reminder-notification', subscription);
+    };
+  },
+
+  onHealthStatsUpdate: (callback: (data: DailyHealthStats) => void) => {
+    if (typeof callback !== 'function') return () => {};
+    const subscription = (_event: IpcRendererEvent, data: DailyHealthStats) => callback(data);
+    ipcRenderer.on('health-stats-update', subscription);
+    return () => {
+      ipcRenderer.removeListener('health-stats-update', subscription);
+    };
+  },
+
+  onCelebrationFeedback: (callback: (data: { type: string; praise: string; stats: DailyHealthStats }) => void) => {
+    if (typeof callback !== 'function') return () => {};
+    const subscription = (_event: IpcRendererEvent, data: { type: string; praise: string; stats: DailyHealthStats }) => callback(data);
+    ipcRenderer.on('celebration-feedback', subscription);
+    return () => {
+      ipcRenderer.removeListener('celebration-feedback', subscription);
     };
   },
 
@@ -54,5 +72,16 @@ contextBridge.exposeInMainWorld('hewanNjir', {
 
   feedMascot: () => {
     ipcRenderer.send('mascot:feed');
-  }
+  },
+
+  acknowledgeReminder: (type: 'hydration' | 'stretch' | 'eyeRest') => {
+    ipcRenderer.send('reminder:acknowledge', { type });
+  },
+
+  snoozeReminder: (type: 'hydration' | 'stretch' | 'eyeRest', minutes: number = 5) => {
+    ipcRenderer.send('reminder:snooze', { type, minutes });
+  },
+
+  getHealthStats: (): Promise<DailyHealthStats> => ipcRenderer.invoke('reminder:get-stats')
 });
+
